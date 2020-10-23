@@ -26,7 +26,7 @@ trait Sluggable
             throw new \Exception('The supported_locales in app config file is required.');
         }
 
-        if (config('sluggable.translatable') && !in_array(\Spatie\Translatable\HasTranslations::class, class_uses(self::class))) {
+        if (config('sluggable.translatable') && !in_array('Spatie\Translatable\HasTranslations', class_uses(self::class))) {
             throw new \Exception('The Spatie Translatable package must be used.');
         }
 
