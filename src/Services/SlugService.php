@@ -32,7 +32,7 @@ class SlugService
 
         $attributes = [];
 
-        foreach ($this->model->sluggable() as $attribute => $config) {
+        foreach ($this->model->sluggableConfig() as $attribute => $config) {
             if (is_numeric($attribute)) {
                 $attribute = $config;
                 $config = $this->getConfiguration();
@@ -77,7 +77,7 @@ class SlugService
      */
     public function buildSlug(string $attribute, array $config, bool $force = null)
     {
-        $slug = $this->model->getAttribute($attribute);
+        $slug = $this->model->getAttribute(str_replace('->', '___', $attribute));
 
         if ($force || $this->needsSlugging($attribute, $config)) {
             $source = $this->getSlugSource($config['source']);
@@ -102,6 +102,8 @@ class SlugService
      */
     protected function needsSlugging(string $attribute, array $config): bool
     {
+        $attribute = str_replace('->', '___', $attribute);
+
         $value = $this->model->getAttributeValue($attribute);
 
         if (
@@ -369,12 +371,12 @@ class SlugService
         }
 
         // get the list of all matching slugs
-        $results = $query->select([$attribute, $this->model->getQualifiedKeyName()])
+        $results = $query->select([$attribute.' as '.str_replace('->','',$attribute), $this->model->getQualifiedKeyName()])
             ->get()
             ->toBase();
 
         // key the results and return
-        return $results->pluck($attribute, $this->model->getKeyName());
+        return $results->pluck(str_replace('->','',$attribute), $this->model->getKeyName());
     }
 
     /**
@@ -408,7 +410,7 @@ class SlugService
         $instance = (new static())->setModel($model);
 
         if ($config === null) {
-            $config = Arr::get($model->sluggable(), $attribute);
+            $config = Arr::get($model->sluggableConfig(), $attribute);
             if ($config === null) {
                 $modelClass = get_class($model);
                 throw new \InvalidArgumentException("Argument 2 passed to SlugService::createSlug ['{$attribute}'] is not a valid slug attribute for model {$modelClass}.");

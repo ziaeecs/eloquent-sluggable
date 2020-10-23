@@ -24,7 +24,7 @@ trait SluggableScopeHelpers
             return $this->slugKeyName;
         }
 
-        $config = $this->sluggable();
+        $config = $this->sluggableConfig();
         $name = reset($config);
         $key = key($config);
 
